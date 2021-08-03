@@ -29,7 +29,6 @@ unsigned int sext(unsigned int x,unsigned int len){
 	return res<<len|x;
 }
 
-
 class simulator{
 private:
 	//pc
@@ -149,20 +148,14 @@ public:
 		//check the head of the queue
 		if(!ROB_now.empty()){
 			ROB_node ROB_tmp=ROB_now.front();
-			// if(ROB_tmp.Dest==0){
-			// 	printf("[ERROR - Dest=0] pc: %d\n",ROB_tmp.pc);
-			// }
 			// printf("ROB:   id: %d Inst: %d pc: %d\n",ROB_tmp.id,ROB_tmp.Inst,ROB_tmp.pc);
 			if(ROB_tmp.Inst==0b0100011||ROB_tmp.Ready)Com=ROB_tmp;
 		}
-		// printf("COM1:   id: %d Inst: %d Jump: %d pc: %d\n",Com.id,Com.Inst,Com.Jump,Com.pc);
 
 		//add the new instruction
 		if(ROB_nxt.Inst!=0)ROB_now.push(ROB_nxt);
 		ROB_nxt.clear();
 
-		// printf("ROB_now[4]'s info Value: %d Ready: %d\n",ROB_now.take(4).Value,ROB_now.take(4).Ready);
-		// printf("ROB_las[4]'s info Value: %d Ready: %d\n",ROB_las.take(4).Value,ROB_las.take(4).Ready);
 	}
 
 	void LSB_handle(){
@@ -172,10 +165,8 @@ public:
 			LSB_now.clear();
 			LSB_nxt.clear();
 			int head=LSB_las.gethead();
-			// puts("!");
 			for(int i=0;i<SIZE;++i){
 				LSB_node LSB_tmp=LSB_las.take((head+i)%SIZE);
-				// printf("|LSB|clear Op: %d Reorder: %d pc: %d Commit: %d\n",LSB_tmp.Op,LSB_tmp.Reorder,LSB_tmp.pc,LSB_tmp.Commit);
 				if(LSB_tmp.Op==0)break;
 				if(LSB_tmp.Commit)LSB_now.push(LSB_tmp);
 			}
@@ -185,19 +176,12 @@ public:
 		if((int)WM.Reorder!=-1){
 			for(int i=0;i<SIZE;++i){
 				LSB_node LSB_tmp=LSB_now.take(i);
-//				printf("|LSB|   %d %d %d %d\n",i,LSB_tmp.Op,LSB_tmp.Reorder,LSB_tmp.pc);
 				if(LSB_tmp.Reorder==WM.Reorder){
-					//printf("===%d %d\n",i,LSB_now.gethead());
 					LSB_tmp.Commit=1;
-					// if((int)LSB_tmp.Qj<0||(int)LSB_tmp.Qk<0){
-					// 	printf("[ERROR] - Store pc: %d Qj: %d Qk: %d\n",LSB_tmp.pc,LSB_tmp.Qj,LSB_tmp.Qk);
-					// 	exit(0);
-					// }
 					LSB_tmp.Vj=Reg_las[LSB_tmp.Qj].V;
 					LSB_tmp.Vk=Reg_las[LSB_tmp.Qk].V;
 					LSB_now.update(i,LSB_tmp);
 					LSB_tmp=LSB_now.front();
-					//printf("-LSB: %d %d\n",LSB_tmp.Op,LSB_tmp.Commit);
 					break;
 				}
 			}
@@ -322,23 +306,13 @@ public:
 			}
 		}
 
-		// {
-		// 	RS_node RS_tmp=RS_now.take(1);
-		// 	printf("RS[1]'s Vj: %d Qj: %d ----- Reg13's V: %d Q: %d\n",RS_tmp.Vj,RS_tmp.Qj,Reg_las[13].V,Reg_las[13].Q);
-		// }
-
 		//find a ready instruction and send it to EX
 		Exc.clear();
 		for(int i=0;i<SIZE;++i){
 			RS_node RS_tmp=RS_now.take(i);
-			// if(i==2){
-			// 	printf("RS[2]   Op: %d Qj: %d pc: %d\n",RS_tmp.Op,RS_tmp.Qj,RS_tmp.pc);
-			// }
 			if(RS_tmp.Ready()){
 				Exc=RS_tmp;
-				// if(Exc.Vj==4484)printf("Reg13's RSid: %d\n",i);
 				RS_now.erase(i);
-				// printf("RS_find_Ready   i: %d\n",i);
 				break;
 			}
 		}
@@ -359,10 +333,6 @@ public:
 
 	void regfile(){
 		for(int i=0;i<SIZE;++i)Reg_now[i]=Reg_las[i];
-		
-		// if(WR.rd==0){
-		// 	printf("[ERROR - rd=0] Reorder: %d\n",WR.Reorder);
-		// }
 
 		if((int)Com_res==-1){//pc error - clear
 			for(int i=0;i<SIZE;++i)Reg_now[i].Q=-1;
@@ -371,7 +341,6 @@ public:
 		}
 
 		if((int)WR.rd!=-1){
-			// printf("Reg's regfile[begin] Inst: %d Val: %d Reorder: %d\n",WR.rd,WR.Value,WR.Reorder);
 			Reg_now[WR.rd].V=WR.Value;
 			if(Reg_now[WR.rd].Q==WR.Reorder)
 				Reg_now[WR.rd].Q=-1;
@@ -454,9 +423,6 @@ public:
 			LSB_nxt.func3=func3;
 			LSB_nxt.A=imm;
 			LSB_nxt.Busy=1;
-			// if(nowpc==4500){
-			// 	printf("[ERROR] - issue rs1: %d rs2: %d\n",rs1,rs2);
-			// }
 			LSB_nxt.Qj=rs1;
 			LSB_nxt.Qk=rs2;
 			LSB_nxt.Reorder=ROB_pos;
@@ -615,8 +581,6 @@ public:
 			RS_nxt.Reorder=ROB_pos;
 			RS_nxt.pc=nowpc;
 
-			// printf("Branch's pc: %d\n",nowpc);
-
 		} else if(opcode==0b0010011){
 			rd=x&((1<<5)-1),x>>=5;
 			func3=x&((1<<3)-1),x>>=3;
@@ -628,8 +592,8 @@ public:
 			if(RS_las.full())return ;
 
 			if(func3==0b001||func3==0b101){//SLLI or SRLI or SRAI
-				shamt=x&((1<<5)-1),x<<=5;
-				func7=x&((1<<7)-1),x<<=7;
+				shamt=x&((1<<5)-1),x>>=5;
+				func7=x&((1<<7)-1),x>>=7;
 
 				//ROB
 				unsigned int ROB_pos=ROB_las.nxtpos();
@@ -655,9 +619,6 @@ public:
 				}
 				RS_nxt.Reorder=ROB_pos;
 				RS_nxt.pc=nowpc;
-
-				// printf("issue's info RS's Vj: %d Qj: %d\n",RS_nxt.Vj,RS_nxt.Qj);
-				// printf("ROB_las's info Value: %d\n",ROB_las.take(4).Value);
 				
 				//Reg
 				WQ.rd=rd;WQ.Value=ROB_pos;
@@ -743,8 +704,6 @@ public:
 		CDB_EX.clear();
 		if(Exc.Op==0)return ;
 
-		// printf("EX Reorder: %d Op: %d pc: %d func3: %d\n",Exc.Reorder,Exc.Op,Exc.pc,Exc.func3);
-		
 		if(Exc.Op==0b0110111){//LUI
 			CDB_EX.Reorder=Exc.Reorder;
 			CDB_EX.Value=Exc.A;
@@ -772,7 +731,6 @@ public:
 				return ;
 			} else if(Exc.func3==0b001){//BNE
 				CDB_EX.Reorder=Exc.Reorder;
-				// printf("BNE's x[rs1]: %d x[rs2]: %d\n",Exc.Vj,Exc.Vk);
 				if(Exc.Vj!=Exc.Vk)CDB_EX.Jump=Exc.pc+Exc.A;
 				return ;
 			} else if(Exc.func3==0b100){//BLT
@@ -786,7 +744,6 @@ public:
 			} else if(Exc.func3==0b110){//BLTU
 				CDB_EX.Reorder=Exc.Reorder;
 				if(Exc.Vj<Exc.Vk)CDB_EX.Jump=Exc.pc+Exc.A;
-				// printf("BLTU's x[rs1]: %d x[rs2]: %d Jump: %d\n",Exc.Vj,Exc.Vk,CDB_EX.Jump);
 				return ;
 			} else if(Exc.func3==0b111){//BGEU
 				CDB_EX.Reorder=Exc.Reorder;
@@ -797,7 +754,6 @@ public:
 			if(Exc.func3==0b000){//ADDI
 				CDB_EX.Reorder=Exc.Reorder;
 				CDB_EX.Value=Exc.Vj+Exc.A;
-				// printf("ADDI's x[rs1]: %d Imm: %d\n",Exc.Vj,Exc.A);
 				return ;
 			} else if(Exc.func3==0b010){//SLTI
 				CDB_EX.Reorder=Exc.Reorder;
@@ -822,7 +778,6 @@ public:
 			} else if(Exc.func3==0b001){//SLLI
 				CDB_EX.Reorder=Exc.Reorder;
 				CDB_EX.Value=Exc.Vj<<Exc.shamt;
-				// printf("SLLI's x[rs1]: %d shamt: %d Qj: %d\n",Exc.Vj,Exc.shamt,Exc.Qj);
 				return ;
 			} else if(Exc.func3==0b101){
 				if(Exc.func7==0b0000000){//SRLI
@@ -897,12 +852,12 @@ public:
 		Com_res=0;
 		if(Com.Inst==0)return ;
 
+		// printf("COM Inst: %d\n",Com.Inst);
 		// printf("COM   Dest: %d Val: %d id: %d Inst: %d Jump: %d pc: %d\n",Com.Dest,Com.Value,Com.id,Com.Inst,Com.Jump,Com.pc);
 		// for(int i=0;i<SIZE;++i)printf("%d ",Reg_now[i].V);puts("");
 		// for(int i=0;i<SIZE;++i)printf("%d ",Reg_now[i].Q);puts("");
 
 		if(Com.Inst==0b1100011){//Branch
-			// printf("!Branch: %d\n",Com.Jump);
 			if((int)Com.Jump!=-1){
 				pc=Com.Jump;
 				Com_res=-1;
@@ -919,7 +874,6 @@ public:
 			Com_res=-1;
 			return ;
 		} else if(Com.Inst==0b0100011){//Store
-//			printf("Commit: %d %d %d\n",Com.id,Com.Inst,Com.pc);
 			WM.Reorder=Com.id;
 			WM.Value=Com.Value;
 			Com_res=1;
@@ -929,7 +883,6 @@ public:
 			WR.Reorder=Com.id;
 			WR.Value=Com.Value;
 			Com_res=1;
-			// if(WR.rd==13)printf("Reg13's WR Dest: %d Val: %d Reorder: %d\n",WR.rd,WR.Value,WR.Reorder);
 			return ;
 		}
 	}
@@ -946,7 +899,7 @@ public:
 	}
 
 	void solve(){
-		// for(int i=1;i<=500;++i){
+		// for(int i=1;i<=1000;++i){
 		while(true){
 			ROB_handle();
 			if(Com.End){
@@ -965,10 +918,6 @@ public:
 
 			if((int)Com_res!=-1&&(int)IQ_pc!=-1)IFqueue.push(IQ_pc);
 			
-			// printf("ClockEnd Reg13's V: %d Q: %d\n\n",Reg_now[13].V,Reg_now[13].Q);
-			// puts("");
-			// printf("Clock: %d's Regfile\n",i);
-			// for(int i=0;i<SIZE;++i)cout<<Reg_now[i].V<<' '<<(int)Reg_now[i].Q<<'\n';puts("");
 		}
 	}
 };
