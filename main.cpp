@@ -148,7 +148,6 @@ public:
 		//check the head of the queue
 		if(!ROB_now.empty()){
 			ROB_node ROB_tmp=ROB_now.front();
-			// printf("ROB:   id: %d Inst: %d pc: %d\n",ROB_tmp.id,ROB_tmp.Inst,ROB_tmp.pc);
 			if(ROB_tmp.Inst==0b0100011||ROB_tmp.Ready)Com=ROB_tmp;
 		}
 
@@ -199,7 +198,6 @@ public:
 
 		//chech the head of the buffer
 		LSB_node LSB_tmp=LSB_now.front();
-		// printf("LSB:   Op: %d Reorder: %d pc: %d\n",LSB_tmp.Op,LSB_tmp.Reorder,LSB_tmp.pc);
 		if(LSB_tmp.Ready()){
 			if(LSB_tmp.Op==0b0000011){//Load
 				if(LSB_tmp.func3==0b000){//LB
@@ -360,9 +358,6 @@ public:
 		
 		unsigned int x=(Mem[nowpc+3]<<24)|(Mem[nowpc+2]<<16)|(Mem[nowpc+1]<<8)|Mem[nowpc];
 		bool isEnd=(x==0x0ff00513);
-		// cout<<"pc: "<<nowpc<<'\n';
-		// for(int i=31;i>=0;--i)cout<<((x&(1<<i))?1:0);
-		// cout<<'\n';
 		unsigned int opcode=x&((1<<7)-1);x>>=7;
 		unsigned int rd=0,rs1=0,rs2=0,func3=0,func7=0,off[32],shamt=0,imm=0;
 		memset(off,0,sizeof(off));
@@ -716,13 +711,11 @@ public:
 			CDB_EX.Reorder=Exc.Reorder;
 			CDB_EX.Value=Exc.pc+4;
 			CDB_EX.Jump=Exc.pc+Exc.A;
-			// printf("JAL's Jump: %d Imm: %d\n",CDB_EX.Jump,Exc.A);
 			return ;
 		} else if(Exc.Op==0b1100111){//JALR
 			CDB_EX.Reorder=Exc.Reorder;
 			CDB_EX.Value=Exc.pc+4;
 			CDB_EX.Jump=(Exc.Vj+Exc.A)&~1;
-			// printf("JALR's Jump: %d\n",CDB_EX.Jump);
 			return ;
 		} else if(Exc.Op==0b1100011){//BEQ ~ BGEU
 			if(Exc.func3==0b000){//BEQ
@@ -852,11 +845,6 @@ public:
 		Com_res=0;
 		if(Com.Inst==0)return ;
 
-		// printf("COM Inst: %d\n",Com.Inst);
-		// printf("COM   Dest: %d Val: %d id: %d Inst: %d Jump: %d pc: %d\n",Com.Dest,Com.Value,Com.id,Com.Inst,Com.Jump,Com.pc);
-		// for(int i=0;i<SIZE;++i)printf("%d ",Reg_now[i].V);puts("");
-		// for(int i=0;i<SIZE;++i)printf("%d ",Reg_now[i].Q);puts("");
-
 		if(Com.Inst==0b1100011){//Branch
 			if((int)Com.Jump!=-1){
 				pc=Com.Jump;
@@ -899,7 +887,6 @@ public:
 	}
 
 	void solve(){
-		// for(int i=1;i<=1000;++i){
 		while(true){
 			ROB_handle();
 			if(Com.End){
