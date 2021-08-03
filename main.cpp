@@ -887,16 +887,24 @@ public:
 	}
 
 	void solve(){
+		//rand
+		int p[5]={0,1,2,3,4};
+		srand(time(0));
+
 		while(true){
-			ROB_handle();
-			if(Com.End){
-				std::cout<<std::dec<<((unsigned int)Reg_las[10].V&255u);
-				break;
-			}
-			LSB_handle();
-			RS_handle();
-			regfile();
-			IF();
+			random_shuffle(p,p+5);
+			for(int i=0;i<5;++i)
+				if(p[i]==0){
+					ROB_handle();
+					if(Com.End){
+						std::cout<<std::dec<<((unsigned int)Reg_las[10].V&255u);
+						return ;
+					}
+				}
+				else if(p[i]==1)LSB_handle();
+				else if(p[i]==2)RS_handle();
+				else if(p[i]==3)regfile();
+				else if(p[i]==4)IF();
 			update();
 
 			EX();
